@@ -1,0 +1,24 @@
+---
+- name: install repo1
+  yum:
+    name=http://mirror.webtatic.com/yum/el6/latest.rpm
+    state=present
+  sudo: yes
+
+- name: installing required system packages
+  yum: pkg={{ item }} state=present
+  with_items:
+    - unzip
+    - curl
+    - tar
+    - gcc
+    - python-setuptools
+    - python-devel
+    - libxml2-devel
+    - mysql-devel
+    - MySQL-python
+  sudo: yes
+    
+- name: install easy_install
+  easy_install: name=pip
+  sudo: yes

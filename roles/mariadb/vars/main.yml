@@ -1,0 +1,8 @@
+---
+# RPMs
+rpm_mysql_shared_compat: "MySQL-shared-compat"
+rpm_mysql_client: "MySQL-client"
+rpm_mysql_python: "MySQL-python"
+rpm_mysql_server: "MySQL-server"
+
+mysql_baseurl: "http://dev.mysql.com/get/Downloads/MySQL-5.6"

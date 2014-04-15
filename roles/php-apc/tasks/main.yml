@@ -1,0 +1,11 @@
+---
+# - name: install alternative php cache 
+#   command: pecl install apc
+
+- name: configure alternative php cache 
+  copy:
+    src=apc.ini
+    dest=/etc/php.d/apc.ini
+  notify:
+    - restart php-fpm
+    - restart nginx

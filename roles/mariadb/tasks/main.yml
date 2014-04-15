@@ -1,0 +1,103 @@
+---
+- name: add offical mariadb repo
+  copy: src=mariadb.repo dest=/etc/yum.repos.d/mariadb.repo
+  sudo: yes
+
+- name: install mariadb
+  yum: name={{ item }} state=present
+  with_items:
+    - MariaDB-server
+    - MariaDB-client
+    - MariaDB-devel
+
+- name: Ensure "mysql" group present
+  tags:
+    - user
+    - permissions
+  group: name=mysql state=present
+  sudo: yes
+
+- name: Ensure "mysql" user present
+  tags:
+    - user
+    - permissions
+  user: name=mysql group=mysql home=/var/lib/mysql shell={{ user_shell }}
+  sudo: yes
+
+- name: Ensure MySQL directories are setup
+  tags:
+    - config
+  file: path={{ item }} owner=mysql group=mysql state=directory
+  with_items:
+    - "{{ mysql_dir }}"
+    - "{{ mysql_dir_data }}"
+    - "{{ mysql_dir_logs }}"
+    - "{{ mysql_dir_temp }}"
+    - "{{ mysql_dir_innodb }}"
+  sudo: yes
+
+- name: Install configuration `/etc/my.cnf` first
+  tags:
+    - config
+  template: src=my.cnf.j2 dest=/etc/my.cnf owner=root group=root mode=0444
+  notify: restart mysql
+  sudo: yes
+
+- name: Initialize MySQL Data Directory
+  tags:
+    - config
+  command: mysql_install_db --user=mysql creates={{ mysql_dir_data}}/mysql
+  sudo: yes
+  sudo_user: mysql
+
+- name: Start MySQL service
+  tags:
+    - config
+  service: name=mysql state=started enabled=yes
+  sudo: yes
+
+- name: Ensure no anonymous users are present
+  tags:
+    - config
+    - permissions
+  mysql_user: name="" host={{ item }} state=absent
+  with_items:
+    - "{{ ansible_hostname }}"
+    - localhost
+  sudo: yes
+
+- name: Remove root@{{ ansible_hostname }} user
+  tags:
+    - config
+    - permissions
+  mysql_user: name="root" host={{ ansible_hostname }} state=absent
+  sudo: yes
+
+- name: Update the password for all MySQL root accounts
+  tags:
+    - rootpasswd
+  mysql_user: name=root host={{ item }} password={{ mysql_root_new_password }}
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+  sudo: yes
+  when: mysql_root_new_password is defined and mysql_root_new_password != ''
+
+# This is for Ansible to be able to change the pw and be able to continue to 
+# manage the server, this is unrelated to the MySQL config file `my.cnf`
+- name: Ensure the /root/.my.cnf file contains MySQL root credentials
+  tags:
+    - config
+    - permissions
+  template: src=root/.my.cnf.j2 dest=/root/.my.cnf owner=root mode=0600
+  notify: restart mysql
+  sudo: yes
+  when: mysql_root_new_password is defined and mysql_root_new_password != ""
+
+
+- name: Ensure the MySQL `test` database doesn't exist
+  tags:
+    - config
+  mysql_db: db=test state=absent
+  sudo: yes

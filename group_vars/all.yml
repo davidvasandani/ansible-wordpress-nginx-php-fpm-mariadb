@@ -1,0 +1,75 @@
+---
+# Default base installation directory
+base_install_dir: "/opt"
+
+wordpress_core_url: blog.you-local.com
+wordpress_core_title: My Network
+wordpress_core_admin_user: user
+wordpress_core_admin_password: password
+wordpress_core_admin_email: user@you-local.com
+wordpress_core_path: /var/www/wordpress/
+
+themes:
+  - danko.zip
+  - landis.zip
+  - lexiity.zip
+  - sinapp.zip
+  - tint.zip
+  - widely.zip
+
+# can't delete default theme twentyfourteen
+# because its active on the main blog site
+default_themes:
+  - twentyfourteen
+  - twentythirteen
+  - twentytwelve
+
+plugins:
+  - auto-upload-images
+  - wordpress-importer
+  - import-external-images
+  - advanced-custom-fields
+  - custom-post-type-ui
+  - jetpack
+  - vine-embed
+  - imagemagick-engine
+
+blogs:
+- short_url: newblog
+  url: newblog.{{ wordpress_core_url }}
+  title: "My New Blog"
+  theme: Landis
+  email: "user@you-local.com"
+  plugins:
+  - auto-upload-images
+  - wordpress-importer
+  - import-external-images
+  - advanced-custom-fields
+  - custom-post-type-ui
+  - jetpack
+  - vine-embed
+- short_url: newblog.qa
+  url: newblog.qa.{{ wordpress_core_url }}
+  title: "My New Blog QA"
+  theme: Sinapp
+  email: "user@you-local.com"
+  plugins:
+  - auto-upload-images
+  - wordpress-importer
+  - import-external-images
+  - advanced-custom-fields
+  - custom-post-type-ui
+  - jetpack
+  - vine-embed
+
+# Default shell
+default_user_shell: "/bin/bash"
+
+# Module Installation
+modules:
+  apc: true
+  memcache: false
+  phpunit: false
+  ssh2: false
+# Disable session garbage collection
+disable_session_gc: false

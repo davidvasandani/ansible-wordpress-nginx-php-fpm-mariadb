@@ -1,0 +1,14 @@
+---
+- name: copy wordpress.conf
+  template:
+    src=wordpress.conf.j2
+    dest=/etc/nginx/sites-available/wordpress.conf
+
+- name: enable wordpress site
+  file:
+    src=/etc/nginx/sites-available/wordpress.conf
+    dest=/etc/nginx/sites-enabled/wordpress.conf
+    state=link
+  notify:
+    - restart php-fpm
+    - restart nginx

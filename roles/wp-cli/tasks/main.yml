@@ -1,0 +1,161 @@
+---
+- name: check for wp-cli
+  file: src=/usr/local/bin/wp dest=/usr/bin/wp state=link
+  ### never use dashes in variable names, they will break everything
+  register: result
+  ignore_errors: true
+
+- name: install wp-cli
+  sudo: false
+  shell: curl https://raw.github.com/wp-cli/wp-cli.github.com/master/installer.sh | bash
+
+- name: make wp-cli shortcut
+  file: src=/home/vagrant/.wp-cli/bin/wp dest=/usr/local/bin/wp state=link
+  when: vagrant
+
+- name: make wp-cli shortcut
+  file: src=/home/mozart/.wp-cli/bin/wp dest=/usr/local/bin/wp state=link
+  when: not vagrant
+
+- name: download wordpress
+  command: wp core download chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+
+- name: fix file permissions
+  file:
+    path={{ wordpress_core_path }}
+    owner=nginx
+    group=root
+    mode=0755
+    state=directory
+    recurse=yes
+
+- name: create wp-config
+  command: wp core config
+    --dbname=warbyparker
+    --dbuser=root
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+
+- name: create wp database
+  command: wp db create
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+
+- name: install wordpress
+  command: wp core multisite-install
+    --url={{ wordpress_core_url }}
+    --subdomains
+    --title="{{ wordpress_core_title }}"
+    --admin_user="{{ wordpress_core_admin_user }}"
+    --admin_password="{{ wordpress_core_admin_password }}"
+    --admin_email="{{ wordpress_core_admin_email }}"
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+  with_items: core
+  register: result
+  #changed_when: "result.stderr != "
+  changed_when: "'The network already exists.' not in result.stdout_lines"
+  # TODO: This will always error out the first time it's run.
+  #failed_when: "'already initialized' not in channel_result.stdout"
+
+- name: set up permalinks
+  command: wp rewrite structure '/blog/%postname%'
+    chdir={{ wordpress_core_path }}
+  notify:
+  - restart nginx
+  - restart php-fpm
+
+- debug: var=active_sites.stdout_lines
+
+- name: setup wordpress sites
+  command: wp site create
+    --slug="{{ item.short_url }}"
+    --title="{{ item.title }}"
+    --email="{{ item.email }}"
+    chdir={{ wordpress_core_path }}
+  with_items: blogs
+  ignore_errors: yes
+  register: result
+  #when: {{ active_sites }} != {{ item.url }}
+  #changed_when: "'' not in result.stdout_lines"
+
+# - name: copy wxr files
+#   copy: src={{ item.data }} dest=/tmp/{{ item.data }}
+#   with_items: blogs
+
+- name: install plugins
+  sudo: yes
+  command: wp plugin install {{ item }}
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+  with_items: plugins
+  register: result
+  changed_when: "'Plugin already installed' not in result.stderr"
+
+- name: activate plugins
+  command: wp plugin activate {{ item.1 }}
+    chdir={{ wordpress_core_path }}
+    --url={{ item.0.url }}
+  ignore_errors: yes
+  with_subelements:
+    - blogs
+    - plugins
+  register: result
+  changed_when: "'' not in result.stderr"
+  failed_when: "'plugin could not be found' in result.stderr"
+
+- name: delete hello world
+  command: wp post delete 1
+    --url={{ item.url }}
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+  with_items: blogs
+  register: result
+  changed_when: "'Warning' not in result.stderr"
+
+- name: delete default themes
+  command: wp theme delete {{ item }}
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+  with_items: default_themes
+
+- name: install the themes
+  unarchive:
+    src={{ item }}
+    dest={{ wordpress_core_path }}/wp-content/themes/
+  with_items: themes
+
+- name: activate themes
+  command: wp theme activate {{ item.theme }}
+    --url={{ item.url }}
+    chdir={{ wordpress_core_path }}
+  ignore_errors: yes
+  with_items: blogs
+
+- name: Copy post to VM
+  template: src=post.txt dest=/tmp/post.txt
+ 
+- name: Post a wordpress post
+  command: wp post create /tmp/post.txt
+    --post_type=post
+    --post_status=publish
+    --post_title='Page from file'
+    chdir={{ wordpress_core_path }}
+
+# - name: import blog data
+#   command: wp import /tmp/{{ item.data }}
+#     --url={{ item.url }}
+#     --authors=create
+#     chdir=/opt/wp/apps/wordpress/
+#   ignore_errors: yes
+#   with_items: blogs
+
+# wp import /tmp/theoculists.wordpress.2014-04-01.xml --url=oculist.blog.wp-local.com --authors=create
+
+# wp import /tmp/theoculists.wordpress.2014-04-01.xml --url=oculist.qa.blog.wp-local.com --authors=create
+
+# wp import /tmp/warbyparker.wordpress.2014-04-01.xml --url=warbyparker.blog.wp-local.com --authors=create
+
+# wp import /tmp/warbyparker.wordpress.2014-04-01.xml --url=warbyparker.qa.blog.wp-local.com --authors=create
+

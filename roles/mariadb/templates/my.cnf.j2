@@ -1,0 +1,77 @@
+# ANSIBLE MANAGED - DO NOT EDIT
+
+[client]
+port                            = {{ mysql_port }}
+socket                          = {{ mysql_socket }}
+ 
+[mysqld]
+bind-address                    = {{ mysql_ip }}
+port                            = {{ mysql_port }}
+socket                          = {{ mysql_socket }}
+
+datadir                         = {{ mysql_dir_data }}
+tmpdir                          = {{ mysql_dir_temp }}
+pid-file                        = {{ mysql_dir_logs }}/mysql.pid
+
+back_log                        = 200
+key_buffer_size                 = 512M
+max_allowed_packet              = 500M
+table_open_cache                = 1000
+table_definition_cache          = 500
+sort_buffer_size                = 10M
+read_buffer_size                = 10M
+read_rnd_buffer_size            = 8M
+join_buffer_size                = 10M
+myisam_sort_buffer_size         = 64M
+max_heap_table_size             = 64M
+thread_cache_size               = 16
+query_cache_size                = 256M
+tmp_table_size                  = 64M
+max_connect_errors              = 10000
+interactive_timeout             = 3600
+wait_timeout                    = 600
+open-files-limit                = 65535
+ 
+slow_query_log                  = On
+slow-query-log-file             = {{ mysql_dir_logs }}/slow_queries.log
+log-error                       = {{ mysql_dir_logs }}/error.log
+general-log-file                = {{ mysql_dir_logs }}/mysql.log
+
+skip-external-locking
+skip-name-resolve
+
+server-id                       = {{ mysql_server_id }}
+log_bin                         = mysql-bin
+binlog_format                   = {{ mysql_binlog_format }}
+expire_logs_days                = 5
+ 
+innodb_data_home_dir            = {{ mysql_dir_innodb }}
+innodb_data_file_path           = {{ innodb_data_file_path }}
+innodb_log_group_home_dir       = {{ mysql_dir_innodb }}
+innodb_buffer_pool_size         = {{ innodb_buffer_pool_size }}
+innodb_additional_mem_pool_size = 20M
+innodb_log_file_size            = 256M
+innodb_log_buffer_size          = 8M
+innodb_flush_log_at_trx_commit  = 1
+innodb_lock_wait_timeout        = 50
+innodb_support_xa               = 1
+innodb_file_per_table           = 1
+ 
+[mysql.server]
+user=mysql
+ 
+[mysqldump]
+quick
+max_allowed_packet              = 200M
+ 
+[mysql]
+no-auto-rehash
+ 
+[myisamchk]
+key_buffer_size                 = 256M
+sort_buffer_size                = 256M
+read_buffer                     = 2M
+write_buffer                    = 2M
+ 
+[mysqlhotcopy]
+interactive-timeout

@@ -1,0 +1,18 @@
+# MySQL Configuration
+mysql_ip: "0.0.0.0"
+mysql_port: "3306"
+mysql_socket: "/var/lib/mysql/mysql.sock"
+mysql_server_id: "100"
+innodb_buffer_pool_size: "512M"
+innodb_data_file_path: "ibdata1:1G;ibdata2:1G;ibdata3:1G"
+
+# MySQL Directories
+mysql_dir: "{{ base_install_dir }}/mysql"
+mysql_dir_data: "{{ mysql_dir }}/data"
+mysql_dir_logs: "{{ mysql_dir }}/logs"
+mysql_dir_temp: "{{ mysql_dir }}/tmp"
+mysql_dir_innodb: "{{ mysql_dir_data }}/innodb"
+mysql_binlog_format: "STATEMENT"
+
+user_shell: "{{ default_user_shell }}"
+

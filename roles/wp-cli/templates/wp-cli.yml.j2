@@ -1,0 +1,11 @@
+path: {{ wordpress_core_path }}
+url: http://{{ wordpress_core_url }}
+user: {{ wordpress_core_admin_user }}
+color: false
+disabled_commands:
+  - db drop
+  - plugin install
+
+core install:
+  admin_user: {{ wordpress_core_admin_user }}
+  admin_email: {{ wordpress_core_admin_email }}

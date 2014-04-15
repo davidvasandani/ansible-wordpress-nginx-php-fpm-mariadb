@@ -1,0 +1,54 @@
+---
+# Hostname is important as we need to delete an anonymous MySQL
+# user that is created with this name, make sure you match this
+# up with the output of the command 'hostname' on the server.
+server_hostname: 'wordpress.dev'
+ansible_hostname: 'wordpress.dev'
+
+# php.ini
+php_max_execution_time: '90'
+php_display_errors: 'On'
+php_display_startup_errors: 'On'
+php_html_errors: 'On'
+php_post_max_size: '32M'
+php_upload_max_filesize: '32M'
+php_date_timezone: 'US/Central'
+
+# apc.ini
+apc_rfc1867: '1'
+apc_shm_size: '256M'
+apc_shm_segments: '1'
+apc_num_files_hint: '0'
+
+# my.cnf
+mysql_max_allowed_packet: '128M'
+mysql_character_set_server: 'utf8'
+mysql_collation_server: 'utf8_general_ci'
+innodb_file_per_table: 'innodb_file_per_table'
+
+# mysql
+mysql_port: 3306
+mysql_root_password: 'password'
+
+# apache
+#apache_server_admin: 'webmaster@example.com'
+#apache_server_alias: '*.*.example.com'
+#
+## vsftpd
+#vsftpd_anonymous_enable: 'NO'
+#vsftpd_local_enable: 'YES'
+#vsftpd_write_enable: 'YES'
+#vsftpd_local_umask: '002'
+
+# wordpress
+wp_version: 3.6
+wp_sha256sum: cf3dac69cd1810d8f4880b2c982fee869a0c56e1c4f793bbfc6d7021fd6da97c
+wp_db_name: wordpress 
+wp_db_user: wordpress
+wp_db_password: secret
+
+wptitle: test
+wpuser: test
+wppass: test
+wpemail: david@davidneudorfer.com
+siteurl: wordpress.dev

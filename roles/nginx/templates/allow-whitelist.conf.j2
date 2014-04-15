@@ -1,0 +1,27 @@
+# ANSIBLE MANAGED - DO NOT EDIT
+
+{% if vagrant %}
+# Vagrant
+allow 192.168.200.1;
+{% else %}
+# 295 Lafayette
+allow 207.239.96.120/30;
+allow 66.104.226.128/27;
+allow 69.38.131.156/30;
+allow 69.38.232.224/28;
+
+# 161 AoA
+allow 206.111.121.160/27;
+allow 50.74.110.88/29;
+allow 69.163.56.144/28;
+
+# Rackspace colo
+allow 198.61.145.176/27;
+
+# Rackspace VPN Internal Net
+allow 192.168.108.0/22;
+{% endif %}
+
+# Local Variables:
+# mode: conf-space
+# End:

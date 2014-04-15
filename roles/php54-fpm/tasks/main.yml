@@ -1,0 +1,50 @@
+---
+- name: install php
+  yum: name={{ item }} state=present
+  with_items:
+    # - php54w
+    # - php54w-common
+    # - php54w-opcache
+    - php54w-fpm
+    - php54w-devel
+    - php54w-mysql
+    - php54w-pecl-apc
+    - php54w-xml
+    # - php54w-xsl
+    - php54w-pear
+    - php54w-mcrypt
+    # - php54w-gd
+    # - php54w-pecl-apc
+    - libxslt
+
+# changes:
+# cgi.fix_pathinfo=0
+# date.timezone = America/New_York
+# memory_limit = 64M
+# expose_php = Off
+
+- name: use php.ini template
+  template:
+    src=php.ini.j2
+    dest=/etc/php.ini
+
+# changes:
+# emergency_restart_threshold = 10
+# emergency_restart_interval = 1m
+# process_control_timeout = 10
+
+- name: use php-fpm.conf template
+  template:
+    src=php-fpm.conf.j2
+    dest=/etc/php-fpm.conf
+
+- name: set-up a PHP-FPM pool
+  template:
+    src=www.conf.j2
+    dest=/etc/php-fpm.d/www.conf
+
+- name: restart PHP-FPM and add it to your system startup
+  service:
+    name=php-fpm
+    state=restarted
+    enabled=yes

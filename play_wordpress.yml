@@ -1,0 +1,15 @@
+- name: installing deps
+  hosts: wordpress
+  sudo: yes
+  vars_files:
+    - group_vars/default-settings.yml
+  gather_facts: yes
+  roles:
+    - role: common
+    - role: mariadb
+    - role: nginx
+    - role: php54-fpm
+    - role: php-apc
+    - role: imagick
+    - role: wp-cli
+    - role: wordpress

@@ -1,0 +1,13 @@
+---
+- name: export wordpress wxr file
+  command: wp export
+    --dir=/tmp/
+    chdir={{ wordpress_core_path }}
+
+- name: setup cron to regularlly backup wxr file to /tmp/ dir
+  cron:
+    name="export wordpress wxr file"
+    special_time=hourly
+    job="wp export --dir=/tmp/ chdir={{ wordpress_core_path }}"
+
+- name: 
